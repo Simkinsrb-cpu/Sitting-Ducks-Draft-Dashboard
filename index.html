@@ -351,6 +351,11 @@
     cursor:pointer;
   }
   .only-available-toggle:has(input:checked){color:var(--teal);}
+  .filter-row-secondary{
+    display:flex;
+    justify-content:flex-end;
+    margin-top:8px;
+  }
 
   /* ---------- Form ---------- */
   .field-row{
@@ -879,6 +884,12 @@
           Only Available
         </label>
       </div>
+      <div class="filter-row-secondary">
+        <label class="only-available-toggle" title="Show the best remaining players first — rank 1 is the highest">
+          <input type="checkbox" id="sortByRankToggle">
+          Sort by Rank
+        </label>
+      </div>
       <p class="sub">Select a player, choose the winning team, log the price.</p>
 
       <div class="field" style="position:relative;">
@@ -1125,6 +1136,7 @@ TEAMS.forEach(t => {
 
 const playerInput = document.getElementById('playerInput');
 const onlyAvailableToggle = document.getElementById('onlyAvailableToggle');
+const sortByRankToggle = document.getElementById('sortByRankToggle');
 const suggestBox = document.getElementById('suggestBox');
 const nflTeamField = document.getElementById('nflTeam');
 const byeField = document.getElementById('byeWeek');
@@ -1193,6 +1205,13 @@ function closeSuggestions() {
   suggestBox.innerHTML = '';
 }
 
+// Ranks a player for the Sort by Rank toggle — 1 is best. Players with no
+// ranking (K, D, and the placeholder entries) sort to the end of the list.
+function rankOf(p) {
+  const r = RANK_LOOKUP[p.pos + '|' + p.name];
+  return r == null ? Infinity : r;
+}
+
 // Search only the Player-name field (Rosters column 1), never team/pos/bye.
 function searchPlayers(query) {
   const q = query.trim().toLowerCase();
@@ -1204,10 +1223,19 @@ function searchPlayers(query) {
     pool = pool.filter(p => p.pos === posFilterValue);
   }
   if (!q) {
-    // no name typed: with a Pos filter active, browse that position A-Z instead of showing nothing
-    return posFilterValue ? pool.slice().sort((a, b) => a.name.localeCompare(b.name)).slice(0, 8) : [];
+    // no name typed: with a Pos filter active, browse that position instead of showing nothing
+    if (!posFilterValue) return [];
+    const browsed = pool.slice();
+    browsed.sort(sortByRankToggle.checked
+      ? (a, b) => rankOf(a) - rankOf(b)
+      : (a, b) => a.name.localeCompare(b.name));
+    return browsed.slice(0, 8);
   }
-  return pool.filter(p => p.name.toLowerCase().includes(q)).slice(0, 8);
+  let matches = pool.filter(p => p.name.toLowerCase().includes(q));
+  if (sortByRankToggle.checked) {
+    matches = matches.slice().sort((a, b) => rankOf(a) - rankOf(b));
+  }
+  return matches.slice(0, 8);
 }
 
 function searchPositions(query) {
@@ -1294,6 +1322,10 @@ playerInput.addEventListener('focus', () => {
 });
 
 onlyAvailableToggle.addEventListener('change', () => {
+  if (playerInput.value.trim() !== '' || posFilterValue) renderSuggestions(searchPlayers(playerInput.value));
+});
+
+sortByRankToggle.addEventListener('change', () => {
   if (playerInput.value.trim() !== '' || posFilterValue) renderSuggestions(searchPlayers(playerInput.value));
 });
 
