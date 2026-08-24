@@ -960,7 +960,7 @@
 <div id="resetOverlay" class="modal-overlay">
   <div class="modal-card">
     <h3>Reset the Draft</h3>
-    <p id="resetModalMsg">Enter the 4-digit PIN to reset every team's roster back to the starting rosters.</p>
+    <p id="resetModalMsg">Enter the 4-digit PIN to reset every team's roster back to the starting rosters and clear the message board.</p>
     <input id="pinInput" type="password" inputmode="numeric" maxlength="4" placeholder="••••" autocomplete="off">
     <div id="resetError" class="modal-error"></div>
     <div class="modal-actions">
@@ -993,7 +993,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script>
-const APP_PIN = '1019'; // shared PIN — gates both first-time site access and Reset
+const APP_PIN = '1698'; // shared PIN — gates both first-time site access and Reset
 
 // ---------- Site access lock (shown once per browser session) ----------
 const LOCK_SESSION_KEY = 'draftCommandCenter_unlocked';
@@ -1530,7 +1530,7 @@ const pinCancelBtn = document.getElementById('pinCancelBtn');
 function openResetModal() {
   pinInput.value = '';
   resetError.textContent = '';
-  resetModalMsg.textContent = "Enter the 4-digit PIN to reset every team's roster back to the starting rosters.";
+  resetModalMsg.textContent = "Enter the 4-digit PIN to reset every team's roster back to the starting rosters and clear the message board.";
   pinSubmitBtn.textContent = 'Reset Draft';
   resetOverlay.classList.add('open');
   pinInput.focus();
@@ -1553,6 +1553,12 @@ pinSubmitBtn.addEventListener('click', () => {
   }
   picks = SEED_PICKS.slice();
   syncPicks();
+  if (firebaseEnabled) {
+    firebase.database().ref('messages').remove();
+  } else {
+    chatMessages = [];
+    renderChat();
+  }
   render();
   closeResetModal();
 });
