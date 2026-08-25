@@ -219,17 +219,19 @@
 
   /* ---------- Header ---------- */
   header{
-    display:flex;
+    display:grid;
+    grid-template-columns:1fr 1.35fr 1fr;
     align-items:flex-end;
-    justify-content:space-between;
-    flex-wrap:wrap;
     gap:16px;
     margin-bottom:26px;
     padding-bottom:18px;
     border-bottom:1px solid var(--border);
   }
+  @media (max-width:1100px){
+    header{grid-template-columns:1fr; justify-items:center; text-align:center;}
+  }
   .brand-eyebrow{
-    display:flex; align-items:center; gap:8px;
+    display:flex; align-items:center; justify-content:center; gap:8px;
     font-family:'JetBrains Mono',monospace;
     font-size:11px; letter-spacing:.14em; color:var(--gold);
     text-transform:uppercase; margin-bottom:6px;
@@ -287,7 +289,7 @@
     background:#0E1526;
     box-shadow:0 10px 26px -8px rgba(242,177,52,.55);
   }
-  .hdr-title{text-align:right;}
+  .hdr-title{text-align:center;}
 
   /* ---------- Layout ---------- */
   .grid{
@@ -298,6 +300,10 @@
   }
   @media (max-width:1100px){
     .grid{grid-template-columns:1fr;}
+  }
+  .cap-tracker-panel{margin-top:-100px;}
+  @media (max-width:1100px){
+    .cap-tracker-panel{margin-top:0;}
   }
   .card{
     background:linear-gradient(180deg,var(--panel-2),var(--panel));
@@ -950,8 +956,8 @@
       <button id="expandByListBtn" class="expand-toggle">Show All &#9662;</button>
     </div>
 
-    <!-- RIGHT: cap tracker -->
-    <div class="card">
+    <!-- RIGHT: cap tracker (shifted up toward the Reset button) -->
+    <div class="card cap-tracker-panel">
       <div class="card-header-row">
         <h2>Cap Tracker</h2>
         <span class="cap-total-badge">$200 / team</span>
